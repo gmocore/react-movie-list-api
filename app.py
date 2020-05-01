@@ -34,6 +34,13 @@ class MovieSchema(ma.Schema):
 movie_schema = MovieSchema()
 movies_schema = MovieSchema(many=True)
 
+@app.route("/api/v1/movies", methods=["GET"])
+def get_movies():
+    all_movies = Movie.query.all()
+    result = movies_schema.dump(all_movies)
+
+    return jsonify(result)
+
 @app.route("/api/v1/movie", methods=["POST"])
 def add_movie():
     title = request.json["title"]
@@ -48,6 +55,15 @@ def add_movie():
 
     movie = Movie.query.get(new_movie.id)
     return movie_schema.jsonify(movie)
+
+@app.route("/api/v1/movie/<id>", methods=["DELETE"])
+def delete_movie(id):
+    movie = Movie.query.get(id)
+    db.session.delete(movie)
+    db.session.commit()
+    # TODO: add cloudinary delete funcionality after implementing front end to get public_id
+
+    return jsonify("Movie GONE!")
 
 @app.route("/")
 def hello():
